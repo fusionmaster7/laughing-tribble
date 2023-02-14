@@ -1,2 +1,12 @@
+// Vs code config file
 .vscode
+// Maven build folder
 target
+// Lox interpreter learning files
+*.lox
+// Output log files
+output.log
+// Shell Script to compile and run
+run.sh
+// TODO files
+TODO

@@ -1,10 +1,14 @@
 package com.loxxer;
 
-import com.loxxer.exceptions.LoxxerException;
+import com.loxxer.errors.LoxxerException;
+import com.loxxer.scanner.LoxxerScanner;
 
 /**
  * Main Application Class
  * This takes a source file written in Lox and interprets it line by line
+ *
+ * @param filepath Absolute path to the Lox source file
+ * @return None
  */
 public class App {
     public static void main(String[] args) {
@@ -17,7 +21,10 @@ public class App {
         try {
             // Run the interpreter using the given filepath
             String filepath = args[0];
-            Loxxer.run(filepath);
+            LoxxerScanner scanner = new LoxxerScanner();
+            Loxxer loxxer = new Loxxer(scanner);
+
+            loxxer.run(filepath);
         } catch (LoxxerException e) {
             System.out.println(e.getMessage());
         }
