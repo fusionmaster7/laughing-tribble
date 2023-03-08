@@ -3,6 +3,8 @@ package com.loxxer.lexical;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.loxxer.error.ErrorHandler;
+
 /*
  * Lexical Scanner Class
  * Takes a source and returns a list of tokens
@@ -15,18 +17,22 @@ public class LexicalScanner {
     private int current;
     private int lineNumber;
 
+    private ErrorHandler errorHandler;
+
     /**
      * Lexical Scanner Class Constructor
      *
      * @param source - Source code as a string
      */
-    public LexicalScanner(String source) {
+    public LexicalScanner(String source, ErrorHandler errorHandler) {
         this.source = source;
         this.tokens = new ArrayList<LexicalToken>();
 
         this.start = 0;
         this.current = 0;
         this.lineNumber = 1;
+
+        this.errorHandler = errorHandler;
     }
 
     private boolean isAtEnd() {
@@ -87,7 +93,8 @@ public class LexicalScanner {
             case '\n':
                 break;
             default:
-                System.out.println("Unhandled character ");
+                this.errorHandler.reportError(
+                        new LexicalError(this.source.substring(this.start, this.current), this.lineNumber));
                 break;
         }
     }

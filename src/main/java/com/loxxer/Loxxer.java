@@ -1,13 +1,11 @@
 package com.loxxer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Scanner;
 
+import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalScanner;
 import com.loxxer.lexical.LexicalToken;
 
@@ -25,11 +23,16 @@ public class Loxxer {
                 String filepath = args[0];
 
                 try {
+                    ErrorHandler errorHandler = new ErrorHandler(false);
                     String source = new String(Files.readAllBytes(Paths.get(filepath)));
-                    LexicalScanner lexicalScanner = new LexicalScanner(source);
+                    LexicalScanner lexicalScanner = new LexicalScanner(source, errorHandler);
 
                     // Send file for scanning
                     List<LexicalToken> tokens = lexicalScanner.scan(source);
+
+                    if (errorHandler.hasErrors()) {
+                        errorHandler.showErrors();
+                    }
 
                     for (LexicalToken token : tokens) {
                         System.out.println(token.toString());
