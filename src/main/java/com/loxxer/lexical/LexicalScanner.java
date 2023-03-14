@@ -51,10 +51,35 @@ public class LexicalScanner {
     private char advance() {
         char ch = this.source.charAt(this.current);
         this.current++;
-        if (ch == '\n') {
-            this.lineNumber++;
-        }
         return ch;
+    }
+
+    private String getLexemme() {
+        return this.source.substring(this.start, this.current);
+    }
+
+    // To match for 2 character operators. <=, >= , != , ==
+    private boolean match(char ch) {
+        if (this.isAtEnd()) {
+            return false;
+        }
+
+        if (this.source.charAt(this.current) != ch) {
+            return false;
+        }
+
+        this.current++;
+
+        return true;
+    }
+
+    // To peek at the current character without consuming it. Look ahead pointer
+    private char peek() {
+        if (this.isAtEnd()) {
+            return '\0';
+        } else {
+            return this.source.charAt(current);
+        }
     }
 
     public void scanToken() {
@@ -81,6 +106,16 @@ public class LexicalScanner {
             case '*':
                 addToken(LexicalTokenType.STAR);
                 break;
+            case '/':
+                // Check for comments
+                if (match('/')) {
+                    while (peek() != '\n' && !this.isAtEnd()) {
+                        advance();
+                    }
+                } else {
+                    addToken(LexicalTokenType.SLASH);
+                }
+                break;
             case ';':
                 addToken(LexicalTokenType.SEMICOLON);
                 break;
@@ -90,11 +125,44 @@ public class LexicalScanner {
             case '.':
                 addToken(LexicalTokenType.DOT);
                 break;
+            case '>':
+                if (match('=')) {
+                    addToken(LexicalTokenType.GREATER_EQUAL);
+                } else {
+                    addToken(LexicalTokenType.GREATER);
+                }
+                break;
+            case '<':
+                if (match('=')) {
+                    addToken(LexicalTokenType.LESS_EQUAL);
+                } else {
+                    addToken(LexicalTokenType.LESS);
+                }
+                break;
+            case '=':
+                if (match('=')) {
+                    addToken(LexicalTokenType.DOUBLE_EQUAL);
+                } else {
+                    addToken(LexicalTokenType.EQUAL);
+                }
+                break;
+            case '!':
+                if (match('=')) {
+                    addToken(LexicalTokenType.BANG_EQUAL);
+                } else {
+                    addToken(LexicalTokenType.BANG);
+                }
+                break;
+            case ' ':
+                break;
+            case '\t':
+                break;
             case '\n':
+                this.lineNumber++;
                 break;
             default:
                 this.errorHandler.reportError(
-                        new LexicalError(this.source.substring(this.start, this.current), this.lineNumber));
+                        new LexicalError(this.getLexemme(), this.lineNumber));
                 break;
         }
     }
