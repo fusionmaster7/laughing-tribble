@@ -13,6 +13,8 @@ public enum LexicalTokenType {
     EQUAL, DOUBLE_EQUAL,
     BANG, BANG_EQUAL, // BANG IS !
 
+    // Literals
+    IDENTIFIER, STRING, NUMBER,
     // End of file token
     EOF
 }

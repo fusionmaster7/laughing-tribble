@@ -153,7 +153,24 @@ public class LexicalScanner {
                     addToken(LexicalTokenType.BANG);
                 }
                 break;
+            // For string literals
+            case '"':
+                StringBuilder builder = new StringBuilder();
+                while (peek() != '"' && !this.isAtEnd()) {
+                    char next = advance();
+                    if (next == '\n') {
+                        this.errorHandler.reportError(new LexicalError(this.getLexemme(), this.lineNumber));
+                    }
+                    builder.append(next);
+                }
+                advance();
+                String lexemme = builder.toString();
+                lexemme.substring(1, lexemme.length() - 1);
+                addToken(LexicalTokenType.STRING, lexemme);
+                break;
             case ' ':
+                break;
+            case 'r':
                 break;
             case '\t':
                 break;
