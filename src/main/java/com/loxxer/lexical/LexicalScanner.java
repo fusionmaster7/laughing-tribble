@@ -155,22 +155,24 @@ public class LexicalScanner {
                 break;
             // For string literals
             case '"':
-                StringBuilder builder = new StringBuilder();
                 while (peek() != '"' && !this.isAtEnd()) {
                     char next = advance();
                     if (next == '\n') {
-                        this.errorHandler.reportError(new LexicalError(this.getLexemme(), this.lineNumber));
+                        this.lineNumber++;
                     }
-                    builder.append(next);
                 }
-                advance();
-                String lexemme = builder.toString();
-                lexemme.substring(1, lexemme.length() - 1);
-                addToken(LexicalTokenType.STRING, lexemme);
+                if (this.isAtEnd()) {
+                    this.errorHandler.reportError(
+                            new LexicalError(this.getLexemme(), "Unterminated string literal", this.lineNumber));
+                } else {
+                    advance();
+                    String lexemme = source.substring(start + 1, current - 1);
+                    addToken(LexicalTokenType.STRING, lexemme);
+                }
                 break;
             case ' ':
                 break;
-            case 'r':
+            case '\r':
                 break;
             case '\t':
                 break;
@@ -179,7 +181,7 @@ public class LexicalScanner {
                 break;
             default:
                 this.errorHandler.reportError(
-                        new LexicalError(this.getLexemme(), this.lineNumber));
+                        new LexicalError(this.getLexemme(), "Unidentified lexical token", this.lineNumber));
                 break;
         }
     }
