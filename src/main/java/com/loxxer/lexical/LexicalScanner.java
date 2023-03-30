@@ -82,6 +82,19 @@ public class LexicalScanner {
         }
     }
 
+    // To check if given char is a digit or not
+    private boolean isDigit(char ch) {
+        return (ch >= '0' && ch <= '9');
+    }
+
+    private char peekNext() {
+        if (this.current + 1 >= this.source.length()) {
+            return '\0';
+        } else {
+            return this.source.charAt(current + 1);
+        }
+    }
+
     public void scanToken() {
         char ch = this.advance();
         switch (ch) {
@@ -180,8 +193,26 @@ public class LexicalScanner {
                 this.lineNumber++;
                 break;
             default:
-                this.errorHandler.reportError(
-                        new LexicalError(this.getLexemme(), "Unidentified lexical token", this.lineNumber));
+                if (isDigit(ch)) {
+                    while (isDigit(peek())) {
+                        advance();
+                    }
+
+                    if (peek() == '.' && isDigit(peekNext())) {
+                        advance();
+                    }
+
+                    while (isDigit(peek())) {
+                        advance();
+                    }
+
+                    String lexemme = this.source.substring(this.start, this.current);
+                    this.addToken(LexicalTokenType.NUMBER, Double.parseDouble(lexemme));
+                } else {
+                    this.errorHandler.reportError(
+                            new LexicalError(this.getLexemme(), "Unidentified lexical token", this.lineNumber));
+
+                }
                 break;
         }
     }
