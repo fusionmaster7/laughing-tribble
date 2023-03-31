@@ -15,6 +15,11 @@ public enum LexicalTokenType {
 
     // Literals
     IDENTIFIER, STRING, NUMBER,
+
+    // Keywords
+    AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
+    PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+
     // End of file token
     EOF
 }

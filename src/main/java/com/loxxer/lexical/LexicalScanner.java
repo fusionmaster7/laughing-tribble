@@ -1,6 +1,7 @@
 package com.loxxer.lexical;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.loxxer.error.ErrorHandler;
@@ -19,6 +20,8 @@ public class LexicalScanner {
 
     private ErrorHandler errorHandler;
 
+    private HashMap<String, LexicalTokenType> keywords;
+
     /**
      * Lexical Scanner Class Constructor
      *
@@ -33,6 +36,28 @@ public class LexicalScanner {
         this.lineNumber = 1;
 
         this.errorHandler = errorHandler;
+        this.keywords = new HashMap<String, LexicalTokenType>();
+        this.addKeywords();
+    }
+
+    // To add keywords to the hashmap
+    private void addKeywords() {
+        keywords.put("and", LexicalTokenType.AND);
+        keywords.put("class", LexicalTokenType.CLASS);
+        keywords.put("else", LexicalTokenType.ELSE);
+        keywords.put("false", LexicalTokenType.FALSE);
+        keywords.put("for", LexicalTokenType.FOR);
+        keywords.put("fun", LexicalTokenType.FUN);
+        keywords.put("if", LexicalTokenType.IF);
+        keywords.put("nil", LexicalTokenType.NIL);
+        keywords.put("or", LexicalTokenType.OR);
+        keywords.put("print", LexicalTokenType.PRINT);
+        keywords.put("return", LexicalTokenType.RETURN);
+        keywords.put("super", LexicalTokenType.SUPER);
+        keywords.put("this", LexicalTokenType.THIS);
+        keywords.put("true", LexicalTokenType.TRUE);
+        keywords.put("var", LexicalTokenType.VAR);
+        keywords.put("while", LexicalTokenType.WHILE);
     }
 
     private boolean isAtEnd() {
@@ -85,6 +110,10 @@ public class LexicalScanner {
     // To check if given char is a digit or not
     private boolean isDigit(char ch) {
         return (ch >= '0' && ch <= '9');
+    }
+
+    private boolean isAlpha(char ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
     }
 
     private char peekNext() {
@@ -208,6 +237,19 @@ public class LexicalScanner {
 
                     String lexemme = this.source.substring(this.start, this.current);
                     this.addToken(LexicalTokenType.NUMBER, Double.parseDouble(lexemme));
+                } else if (isAlpha(ch)) {
+                    while (isAlpha(peek())) {
+                        advance();
+                    }
+
+                    String lexemme = this.source.substring(this.start, this.current);
+                    LexicalTokenType tokenType = this.keywords.get(lexemme);
+                    if (tokenType == null) {
+                        this.addToken(LexicalTokenType.IDENTIFIER);
+                    } else {
+                        this.addToken(tokenType);
+                    }
+
                 } else {
                     this.errorHandler.reportError(
                             new LexicalError(this.getLexemme(), "Unidentified lexical token", this.lineNumber));
