@@ -21,6 +21,15 @@ public class LexicalToken {
 
     @Override
     public String toString() {
-        return "Token type " + this.tokenType + " having value " + this.lexemme + " on line number " + this.lineNumber;
+        String value = "";
+        if (this.tokenType == LexicalTokenType.STRING) {
+            value = this.literal.toString();
+        } else {
+            value = this.lexemme;
+        }
+
+        return "Token type " + this.tokenType + " having value " + value + " on line number "
+                + this.lineNumber;
+
     }
 }
