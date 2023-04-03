@@ -8,6 +8,7 @@ import java.util.List;
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalScanner;
 import com.loxxer.lexical.LexicalToken;
+import com.loxxer.parser.Parser;
 
 /**
  * Main class to run the interpreter
@@ -26,17 +27,21 @@ public class Loxxer {
                     ErrorHandler errorHandler = new ErrorHandler(false);
                     String source = new String(Files.readAllBytes(Paths.get(filepath)));
                     LexicalScanner lexicalScanner = new LexicalScanner(source, errorHandler);
+                    Parser parser = new Parser();
 
                     // Send file for scanning
                     List<LexicalToken> tokens = lexicalScanner.scan(source);
 
-                    if (errorHandler.hasErrors()) {
-                        errorHandler.showErrors();
-                    }
-
-                    for (LexicalToken token : tokens) {
-                        System.out.println(token.toString());
-                    }
+                    /*
+                     * if (errorHandler.hasErrors()) {
+                     * errorHandler.showErrors();
+                     * }
+                     *
+                     * for (LexicalToken token : tokens) {
+                     * System.out.println(token.toString());
+                     * }
+                     */
+                    parser.printAST();
                 } catch (IOException e) {
                     System.out.println("Error: File not found");
                 }

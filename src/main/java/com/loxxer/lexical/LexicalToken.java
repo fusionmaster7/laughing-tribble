@@ -32,4 +32,8 @@ public class LexicalToken {
                 + this.lineNumber;
 
     }
+
+    public String getLexemme() {
+        return this.lexemme;
+    }
 }
