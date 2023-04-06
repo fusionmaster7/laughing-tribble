@@ -9,6 +9,8 @@ import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalScanner;
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.Parser;
+import com.loxxer.parser.classes.ASTVisitor;
+import com.loxxer.parser.classes.expr.Expr;
 
 /**
  * Main class to run the interpreter
@@ -27,21 +29,24 @@ public class Loxxer {
                     ErrorHandler errorHandler = new ErrorHandler(false);
                     String source = new String(Files.readAllBytes(Paths.get(filepath)));
                     LexicalScanner lexicalScanner = new LexicalScanner(source, errorHandler);
-                    Parser parser = new Parser();
 
                     // Send file for scanning
                     List<LexicalToken> tokens = lexicalScanner.scan(source);
 
-                    /*
-                     * if (errorHandler.hasErrors()) {
-                     * errorHandler.showErrors();
-                     * }
-                     *
-                     * for (LexicalToken token : tokens) {
-                     * System.out.println(token.toString());
-                     * }
-                     */
-                    parser.printAST();
+                    // Parse to form the Syntax Tree
+                    Parser parser = new Parser(tokens, errorHandler);
+                    Expr root = parser.parse();
+
+                    if (errorHandler.hasErrors()) {
+                        errorHandler.showErrors();
+                    }
+
+                    if (root != null) {
+                        ASTVisitor prettyPrinter = new ASTVisitor();
+                        System.out.println(root.accept(prettyPrinter));
+
+                    }
+
                 } catch (IOException e) {
                     System.out.println("Error: File not found");
                 }

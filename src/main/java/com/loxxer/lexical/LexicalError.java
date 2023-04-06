@@ -2,7 +2,7 @@ package com.loxxer.lexical;
 
 import com.loxxer.error.LoxxerError;
 
-public class LexicalError implements LoxxerError {
+public class LexicalError extends LoxxerError {
     private String lexemme;
     private String errorMessage;
     private int lineNumber;
