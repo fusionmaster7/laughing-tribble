@@ -1,5 +1,5 @@
 package com.loxxer.error;
 
 public enum LoxxerErrorType {
-    LEXICAL_ERROR, PARSING_ERROR
+    LEXICAL_ERROR, PARSING_ERROR, RUNTIME_ERROR
 }

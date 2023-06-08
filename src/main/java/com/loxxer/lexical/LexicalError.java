@@ -1,6 +1,7 @@
 package com.loxxer.lexical;
 
 import com.loxxer.error.LoxxerError;
+import com.loxxer.error.LoxxerErrorType;
 
 public class LexicalError extends LoxxerError {
     private String lexemme;
@@ -18,4 +19,10 @@ public class LexicalError extends LoxxerError {
         return "[Lexical Error]: " + this.errorMessage + " on lexemme " + this.lexemme + " on line number "
                 + this.lineNumber;
     }
+
+    @Override
+    public LoxxerErrorType getErrorType() {
+        return LoxxerErrorType.LEXICAL_ERROR;
+    }
+
 }

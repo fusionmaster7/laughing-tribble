@@ -5,4 +5,6 @@ package com.loxxer.error;
  */
 public interface ILoxxerError {
     public String getErrorMessage();
+
+    public LoxxerErrorType getErrorType();
 }

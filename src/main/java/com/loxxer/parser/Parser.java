@@ -132,9 +132,7 @@ public class Parser {
             return new Grouping(expr);
         }
 
-
-
-        throw error(peek(),"Expect Expression");
+        throw error(peek(), "Expect Expression");
     }
 
     private Expr unary() {
@@ -193,13 +191,12 @@ public class Parser {
         return finalExpr;
     }
 
-    public Expr parse() {
+    public Expr parse() throws ParsingError {
         try {
             Expr finalExpr = expr();
             return finalExpr;
         } catch (ParsingError e) {
-            return null;
+            throw e;
         }
     }
-
 }
