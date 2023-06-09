@@ -1,7 +1,7 @@
 package com.loxxer.parser.classes.expr;
 
 import com.loxxer.lexical.LexicalToken;
-import com.loxxer.parser.classes.IVisitor;
+import com.loxxer.parser.classes.visitor.IVisitor;
 
 public class Binary extends Expr {
 	public final Expr left;

@@ -13,9 +13,8 @@ import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.Parser;
 import com.loxxer.parser.ParsingError;
 import com.loxxer.parser.RuntimeError;
-import com.loxxer.parser.classes.ASTVisitor;
-import com.loxxer.parser.classes.ExprVisitor;
-import com.loxxer.parser.classes.expr.Expr;
+import com.loxxer.parser.classes.statements.Stmt;
+import com.loxxer.parser.classes.visitor.StmtVisitor;
 
 /**
  * Main class to run the interpreter
@@ -45,15 +44,11 @@ public class Loxxer {
 
                     // Parse to form the Syntax Tree
                     Parser parser = new Parser(tokens, errorHandler);
-                    Expr root = parser.parse();
+                    List<Stmt> program = parser.parse();
 
-                    if (root != null) {
-                        ASTVisitor prettyPrinter = new ASTVisitor();
-                        ExprVisitor visitor = new ExprVisitor(errorHandler);
-                        System.out.println(root.accept(prettyPrinter));
-                        System.out.println("Evaluating expression...");
-                        System.out.println(root.accept(visitor).toString());
-
+                    StmtVisitor stmtVisitor = new StmtVisitor(errorHandler);
+                    for (Stmt statement : program) {
+                        statement.accept(stmtVisitor);
                     }
 
                 } catch (IOException e) {
@@ -92,16 +87,6 @@ public class Loxxer {
 
                         // Parse to form the Syntax Tree
                         Parser parser = new Parser(tokens, errorHandler);
-                        Expr root = parser.parse();
-
-                        if (root != null) {
-                            ASTVisitor prettyPrinter = new ASTVisitor();
-                            ExprVisitor visitor = new ExprVisitor(errorHandler);
-                            System.out.println(root.accept(prettyPrinter));
-                            System.out.println("Evaluating expression...");
-                            System.out.println(root.accept(visitor).toString());
-
-                        }
                     } catch (LexicalError e) {
                         System.out.println(e.getErrorMessage());
                     } catch (ParsingError e) {

@@ -1,5 +1,6 @@
 package com.loxxer.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.loxxer.error.ErrorHandler;
@@ -10,6 +11,9 @@ import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
+import com.loxxer.parser.classes.statements.ExprStmt;
+import com.loxxer.parser.classes.statements.PrintStmt;
+import com.loxxer.parser.classes.statements.Stmt;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -191,10 +195,41 @@ public class Parser {
         return finalExpr;
     }
 
-    public Expr parse() throws ParsingError {
+    private ExprStmt exprStmt() {
+        Expr expr = expr();
+        if (!match(LexicalTokenType.SEMICOLON)) {
+            throw error(peek(), "Semicolon missing");
+        }
+
+        return new ExprStmt(expr);
+    }
+
+    private PrintStmt printStmt() {
+        Expr expr = expr();
+        if (!match(LexicalTokenType.SEMICOLON)) {
+            throw error(peek(), "Semicolon missing");
+        }
+
+        return new PrintStmt(expr);
+    }
+
+    private Stmt statement() {
+        if (match(LexicalTokenType.PRINT)) {
+            return printStmt();
+        } else {
+            return exprStmt();
+        }
+    }
+
+    public List<Stmt> parse() throws ParsingError {
         try {
-            Expr finalExpr = expr();
-            return finalExpr;
+            List<Stmt> statements = new ArrayList<Stmt>();
+            while (!isAtEnd()) {
+                Stmt statement = statement();
+                statements.add(statement);
+            }
+
+            return statements;
         } catch (ParsingError e) {
             throw e;
         }

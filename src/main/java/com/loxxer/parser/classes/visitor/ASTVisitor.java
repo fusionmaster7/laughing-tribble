@@ -1,4 +1,4 @@
-package com.loxxer.parser.classes;
+package com.loxxer.parser.classes.visitor;
 
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Grouping;

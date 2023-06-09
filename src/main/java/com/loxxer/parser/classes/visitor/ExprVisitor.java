@@ -1,4 +1,4 @@
-package com.loxxer.parser.classes;
+package com.loxxer.parser.classes.visitor;
 
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalToken;

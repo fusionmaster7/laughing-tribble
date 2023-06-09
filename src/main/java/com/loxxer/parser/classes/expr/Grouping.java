@@ -1,6 +1,6 @@
 package com.loxxer.parser.classes.expr;
 
-import com.loxxer.parser.classes.IVisitor;
+import com.loxxer.parser.classes.visitor.IVisitor;
 
 public class Grouping extends Expr {
 	public final Expr expr;
