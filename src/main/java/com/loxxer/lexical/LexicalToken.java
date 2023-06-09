@@ -32,4 +32,24 @@ public class LexicalToken {
                 + this.lineNumber;
 
     }
+
+    public String getLexemme() {
+        if (this.tokenType == LexicalTokenType.EOF) {
+            return "\\n";
+        } else {
+            return this.lexemme;
+        }
+    }
+
+    public LexicalTokenType getTokenType() {
+        return this.tokenType;
+    }
+
+    public Object getLiteral() {
+        return this.literal;
+    }
+
+    public int getLineNumber() {
+        return this.lineNumber;
+    }
 }

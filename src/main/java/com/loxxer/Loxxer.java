@@ -4,15 +4,28 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
 
 import com.loxxer.error.ErrorHandler;
+import com.loxxer.lexical.LexicalError;
 import com.loxxer.lexical.LexicalScanner;
 import com.loxxer.lexical.LexicalToken;
+import com.loxxer.parser.Parser;
+import com.loxxer.parser.ParsingError;
+import com.loxxer.parser.RuntimeError;
+import com.loxxer.parser.classes.ASTVisitor;
+import com.loxxer.parser.classes.ExprVisitor;
+import com.loxxer.parser.classes.expr.Expr;
 
 /**
  * Main class to run the interpreter
  */
 public class Loxxer {
+    // Show the input prompt
+    private void prompt() {
+        System.out.print("> ");
+    }
+
     public static void main(String[] args) throws IOException {
 
         // Check if some file path has been provided, if not then start in CLI mode
@@ -30,20 +43,74 @@ public class Loxxer {
                     // Send file for scanning
                     List<LexicalToken> tokens = lexicalScanner.scan(source);
 
-                    if (errorHandler.hasErrors()) {
-                        errorHandler.showErrors();
+                    // Parse to form the Syntax Tree
+                    Parser parser = new Parser(tokens, errorHandler);
+                    Expr root = parser.parse();
+
+                    if (root != null) {
+                        ASTVisitor prettyPrinter = new ASTVisitor();
+                        ExprVisitor visitor = new ExprVisitor(errorHandler);
+                        System.out.println(root.accept(prettyPrinter));
+                        System.out.println("Evaluating expression...");
+                        System.out.println(root.accept(visitor).toString());
+
                     }
 
-                    for (LexicalToken token : tokens) {
-                        System.out.println(token.toString());
-                    }
                 } catch (IOException e) {
                     System.out.println("Error: File not found");
+                } catch (LexicalError e) {
+                    System.out.println(e.getErrorMessage());
+                    System.exit(65);
+                } catch (ParsingError e) {
+                    System.out.println(e.getErrorMessage());
+                    System.exit(65);
+                } catch (RuntimeError e) {
+                    System.out.println(e.getErrorMessage());
+                    System.exit(70);
                 }
             }
         } else {
-            System.out.println("Running lox in interpreter mode");
+            System.out.println("Running lox in interpreter mode. Type exit() to exit the interpreter.");
+            Loxxer loxxer = new Loxxer();
+            Scanner input = new Scanner(System.in);
+
             // Run the interpreter prompt
+            while (true) {
+                loxxer.prompt();
+                String source = input.nextLine();
+
+                if (source.equals("exit()")) {
+                    input.close();
+                    return;
+                } else {
+                    try {
+                        ErrorHandler errorHandler = new ErrorHandler(false);
+                        LexicalScanner lexicalScanner = new LexicalScanner(source, errorHandler);
+
+                        // Send file for scanning
+                        List<LexicalToken> tokens = lexicalScanner.scan(source);
+
+                        // Parse to form the Syntax Tree
+                        Parser parser = new Parser(tokens, errorHandler);
+                        Expr root = parser.parse();
+
+                        if (root != null) {
+                            ASTVisitor prettyPrinter = new ASTVisitor();
+                            ExprVisitor visitor = new ExprVisitor(errorHandler);
+                            System.out.println(root.accept(prettyPrinter));
+                            System.out.println("Evaluating expression...");
+                            System.out.println(root.accept(visitor).toString());
+
+                        }
+                    } catch (LexicalError e) {
+                        System.out.println(e.getErrorMessage());
+                    } catch (ParsingError e) {
+                        System.out.println(e.getErrorMessage());
+                    } catch (RuntimeError e) {
+                        System.out.println(e.getErrorMessage());
+                    }
+                }
+            }
         }
     }
 }

@@ -204,8 +204,10 @@ public class LexicalScanner {
                     }
                 }
                 if (this.isAtEnd()) {
-                    this.errorHandler.reportError(
-                            new LexicalError(this.getLexemme(), "Unterminated string literal", this.lineNumber));
+                    LexicalError error = new LexicalError(this.getLexemme(), "Unterminated string literal",
+                            this.lineNumber);
+                    this.errorHandler.reportError(error);
+                    throw error;
                 } else {
                     advance();
                     String lexemme = source.substring(start + 1, current - 1);
@@ -251,15 +253,17 @@ public class LexicalScanner {
                     }
 
                 } else {
-                    this.errorHandler.reportError(
-                            new LexicalError(this.getLexemme(), "Unidentified lexical token", this.lineNumber));
+                    LexicalError error = new LexicalError(this.getLexemme(), "Unidentified lexical token",
+                            this.lineNumber);
+                    this.errorHandler.reportError(error);
+                    throw error;
 
                 }
                 break;
         }
     }
 
-    public List<LexicalToken> scan(String source) {
+    public List<LexicalToken> scan(String source) throws LexicalError {
 
         while (!this.isAtEnd()) {
             this.start = this.current;
