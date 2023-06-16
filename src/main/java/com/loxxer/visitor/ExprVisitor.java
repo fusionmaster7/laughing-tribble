@@ -1,4 +1,4 @@
-package com.loxxer.parser.classes.visitor;
+package com.loxxer.visitor;
 
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalToken;
@@ -7,6 +7,7 @@ import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
+import com.loxxer.parser.classes.expr.Variable;
 
 /*
  * Class that traverses the syntax tree and evaluates the expression
@@ -138,5 +139,10 @@ public class ExprVisitor implements IVisitor<Object> {
     @Override
     public Object visitLiteralExpr(Literal expr) throws RuntimeError {
         return expr.value;
+    }
+
+    @Override
+    public Object visitVariableExpr(Variable expr) throws RuntimeError {
+        return expr.token.getLexemme();
     }
 }

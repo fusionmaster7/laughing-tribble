@@ -1,4 +1,4 @@
-package com.loxxer.parser.classes.visitor;
+package com.loxxer.visitor;
 
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;

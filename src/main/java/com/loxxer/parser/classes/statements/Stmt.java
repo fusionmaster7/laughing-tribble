@@ -1,6 +1,6 @@
 package com.loxxer.parser.classes.statements;
 
-import com.loxxer.parser.classes.visitor.IStmtVisitor;
+import com.loxxer.visitor.IStmtVisitor;
 
 // Base class to represent statements
 public abstract class Stmt {

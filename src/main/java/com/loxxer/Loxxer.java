@@ -14,7 +14,7 @@ import com.loxxer.parser.Parser;
 import com.loxxer.parser.ParsingError;
 import com.loxxer.parser.RuntimeError;
 import com.loxxer.parser.classes.statements.Stmt;
-import com.loxxer.parser.classes.visitor.StmtVisitor;
+import com.loxxer.visitor.StmtVisitor;
 
 /**
  * Main class to run the interpreter

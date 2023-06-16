@@ -1,7 +1,7 @@
 package com.loxxer.parser.classes.statements;
 
 import com.loxxer.parser.classes.expr.Expr;
-import com.loxxer.parser.classes.visitor.IStmtVisitor;
+import com.loxxer.visitor.IStmtVisitor;
 
 public class ExprStmt extends Stmt {
     public Expr expr;

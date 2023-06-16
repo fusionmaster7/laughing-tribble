@@ -1,4 +1,4 @@
-package com.loxxer.parser.classes.visitor;
+package com.loxxer.visitor;
 
 import com.loxxer.parser.classes.expr.*;
 
@@ -11,4 +11,6 @@ public interface IVisitor<T> {
 	public T visitGroupingExpr(Grouping expr);
 
 	public T visitLiteralExpr(Literal expr);
+
+	public T visitVariableExpr(Variable expr);
 }

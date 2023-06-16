@@ -11,6 +11,7 @@ import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
+import com.loxxer.parser.classes.expr.Variable;
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
@@ -138,6 +139,10 @@ public class Parser {
             return new Grouping(expr);
         }
 
+        if (match(LexicalTokenType.IDENTIFIER)) {
+            return new Variable(previous());
+        }
+
         throw error(peek(), "Expect Expression");
     }
 
@@ -236,7 +241,7 @@ public class Parser {
 
                 return new VarStmt(token, expr);
             } else if (match(LexicalTokenType.SEMICOLON)) {
-                return new VarStmt(token, null);
+                return new VarStmt(token);
             } else {
                 throw error(peek(), "Semicolon Missing");
             }

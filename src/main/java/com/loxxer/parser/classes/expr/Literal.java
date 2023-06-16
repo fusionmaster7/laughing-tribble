@@ -1,6 +1,6 @@
 package com.loxxer.parser.classes.expr;
 
-import com.loxxer.parser.classes.visitor.IVisitor;
+import com.loxxer.visitor.IVisitor;
 
 public class Literal extends Expr {
 	public final Object value;
