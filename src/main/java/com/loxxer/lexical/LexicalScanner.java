@@ -116,6 +116,11 @@ public class LexicalScanner {
         return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
     }
 
+    // Checks whether ch is a valid alphanumeric character
+    private boolean isAlphaNum(char ch) {
+        return isAlpha(ch) || isDigit(ch);
+    }
+
     private char peekNext() {
         if (this.current + 1 >= this.source.length()) {
             return '\0';
@@ -240,7 +245,7 @@ public class LexicalScanner {
                     String lexemme = this.source.substring(this.start, this.current);
                     this.addToken(LexicalTokenType.NUMBER, Double.parseDouble(lexemme));
                 } else if (isAlpha(ch)) {
-                    while (isAlpha(peek())) {
+                    while (isAlphaNum(peek())) {
                         advance();
                     }
 

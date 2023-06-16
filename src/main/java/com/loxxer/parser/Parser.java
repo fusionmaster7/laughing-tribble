@@ -14,6 +14,7 @@ import com.loxxer.parser.classes.expr.Unary;
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
+import com.loxxer.parser.classes.statements.VarStmt;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -114,6 +115,7 @@ public class Parser {
     }
 
     private Expr primary() {
+
         if (match(LexicalTokenType.FALSE)) {
             return new Literal(false);
         }
@@ -221,15 +223,46 @@ public class Parser {
         }
     }
 
+    private Stmt varDeclaration() {
+        if (match(LexicalTokenType.IDENTIFIER)) {
+            LexicalToken token = previous();
+            if (match(LexicalTokenType.EQUAL)) {
+                Expr expr = expr();
+
+                if (!match(LexicalTokenType.SEMICOLON)) {
+                    throw error(peek(), "Semicolon Missing");
+
+                }
+
+                return new VarStmt(token, expr);
+            } else if (match(LexicalTokenType.SEMICOLON)) {
+                return new VarStmt(token, null);
+            } else {
+                throw error(peek(), "Semicolon Missing");
+            }
+        } else {
+            throw error(peek(), "Identifier missing. Identifier name must be specified");
+        }
+
+    }
+
+    private Stmt declaration() {
+        if (match(LexicalTokenType.VAR)) {
+            return varDeclaration();
+        } else {
+            return statement();
+        }
+    }
+
     public List<Stmt> parse() throws ParsingError {
         try {
-            List<Stmt> statements = new ArrayList<Stmt>();
+            List<Stmt> declarations = new ArrayList<Stmt>();
             while (!isAtEnd()) {
-                Stmt statement = statement();
-                statements.add(statement);
+                Stmt declaration = declaration();
+                declarations.add(declaration);
             }
 
-            return statements;
+            return declarations;
         } catch (ParsingError e) {
             throw e;
         }
