@@ -3,9 +3,13 @@ package com.loxxer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Map.Entry;
 
+import com.loxxer.environment.Environment;
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalError;
 import com.loxxer.lexical.LexicalScanner;
@@ -13,6 +17,8 @@ import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.Parser;
 import com.loxxer.parser.ParsingError;
 import com.loxxer.parser.RuntimeError;
+import com.loxxer.parser.classes.expr.Expr;
+import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.visitor.StmtVisitor;
 
@@ -36,6 +42,8 @@ public class Loxxer {
 
                 try {
                     ErrorHandler errorHandler = new ErrorHandler(false);
+                    Environment environment = new Environment();
+
                     String source = new String(Files.readAllBytes(Paths.get(filepath)));
                     LexicalScanner lexicalScanner = new LexicalScanner(source, errorHandler);
 
@@ -46,7 +54,7 @@ public class Loxxer {
                     Parser parser = new Parser(tokens, errorHandler);
                     List<Stmt> program = parser.parse();
 
-                    StmtVisitor stmtVisitor = new StmtVisitor(errorHandler);
+                    StmtVisitor stmtVisitor = new StmtVisitor(environment, errorHandler);
                     for (Stmt statement : program) {
                         statement.accept(stmtVisitor);
                     }

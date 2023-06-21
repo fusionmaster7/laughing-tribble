@@ -1,5 +1,6 @@
 package com.loxxer.visitor;
 
+import com.loxxer.environment.Environment;
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.RuntimeError;
@@ -14,6 +15,7 @@ import com.loxxer.parser.classes.expr.Variable;
  */
 public class ExprVisitor implements IVisitor<Object> {
     private ErrorHandler errorHandler;
+    private Environment environment;
 
     // Check if operand is of the class Double or not
     private boolean checkNumberOperand(LexicalToken operator, Object operand) throws RuntimeError {
@@ -60,8 +62,9 @@ public class ExprVisitor implements IVisitor<Object> {
         return left.equals(right);
     }
 
-    public ExprVisitor(ErrorHandler errorHandler) {
+    public ExprVisitor(ErrorHandler errorHandler, Environment environment) {
         this.errorHandler = errorHandler;
+        this.environment = environment;
     }
 
     @Override
@@ -143,6 +146,8 @@ public class ExprVisitor implements IVisitor<Object> {
 
     @Override
     public Object visitVariableExpr(Variable expr) throws RuntimeError {
-        return expr.token.getLexemme();
+        String variable = expr.token.getLexemme();
+
+        return this.environment.get(variable);
     }
 }
