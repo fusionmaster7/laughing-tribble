@@ -1,5 +1,6 @@
 package com.loxxer.visitor;
 
+import com.loxxer.parser.classes.expr.Assign;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Literal;
@@ -34,5 +35,9 @@ public class ASTVisitor implements IVisitor<String> {
 
     public String visitVariableExpr(Variable expr) {
         return expr.token.getLexemme();
+    }
+
+    public String visitAssignExpr(Assign expr) {
+        return "Assignment expression";
     }
 }

@@ -4,6 +4,7 @@ import com.loxxer.environment.Environment;
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.RuntimeError;
+import com.loxxer.parser.classes.expr.Assign;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Literal;
@@ -149,5 +150,14 @@ public class ExprVisitor implements IVisitor<Object> {
         String variable = expr.token.getLexemme();
 
         return this.environment.get(variable);
+    }
+
+    @Override
+    public Object visitAssignExpr(Assign expr) {
+
+        Object value = expr.value.accept(this);
+        this.environment.set(expr.token.getLexemme(), value);
+
+        return value;
     }
 }

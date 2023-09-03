@@ -13,4 +13,6 @@ public interface IVisitor<T> {
 	public T visitLiteralExpr(Literal expr);
 
 	public T visitVariableExpr(Variable expr);
+
+	public T visitAssignExpr(Assign expr);
 }

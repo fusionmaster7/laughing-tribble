@@ -8,6 +8,7 @@ import com.loxxer.lexical.LexicalToken;
 import com.loxxer.lexical.LexicalTokenType;
 import com.loxxer.parser.classes.expr.Expr;
 import com.loxxer.parser.classes.expr.Grouping;
+import com.loxxer.parser.classes.expr.Assign;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
@@ -16,6 +17,7 @@ import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
+import com.loxxer.visitor.ASTVisitor;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -189,7 +191,7 @@ public class Parser {
 
     private Expr equality() {
         Expr expr = comparison();
-        while (match(LexicalTokenType.BANG_EQUAL, LexicalTokenType.EQUAL)) {
+        while (match(LexicalTokenType.BANG_EQUAL, LexicalTokenType.DOUBLE_EQUAL)) {
             LexicalToken op = previous();
             Expr right = comparison();
             expr = new Binary(expr, op, right);
@@ -197,8 +199,23 @@ public class Parser {
         return expr;
     }
 
+    private Expr assignment() {
+        Expr expr = equality();
+        if (match(LexicalTokenType.EQUAL)) {
+            LexicalToken equals = previous();
+            if (expr instanceof Variable) {
+                LexicalToken token = ((Variable) expr).token;
+                Expr value = assignment();
+                return new Assign(token, value);
+            } else {
+                error(peek(), "Invalid assignment after =");
+            }
+        }
+        return expr;
+    }
+
     private Expr expr() {
-        Expr finalExpr = equality();
+        Expr finalExpr = assignment();
         return finalExpr;
     }
 
