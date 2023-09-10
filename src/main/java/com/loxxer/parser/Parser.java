@@ -13,6 +13,7 @@ import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
 import com.loxxer.parser.classes.expr.Variable;
+import com.loxxer.parser.classes.statements.BlockStmt;
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
@@ -237,9 +238,24 @@ public class Parser {
         return new PrintStmt(expr);
     }
 
+    private BlockStmt block() {
+        BlockStmt block = new BlockStmt();
+
+        while (!isAtEnd() && peek().getTokenType() != LexicalTokenType.RIGHT_BRACE) {
+            Stmt decl = declaration();
+            block.addDeclaration(decl);
+        }
+
+        advance();
+
+        return block;
+    }
+
     private Stmt statement() {
         if (match(LexicalTokenType.PRINT)) {
             return printStmt();
+        } else if (match(LexicalTokenType.LEFT_BRACE)) {
+            return block();
         } else {
             return exprStmt();
         }

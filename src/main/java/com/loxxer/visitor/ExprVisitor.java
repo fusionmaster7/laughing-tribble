@@ -149,7 +149,13 @@ public class ExprVisitor implements IVisitor<Object> {
     public Object visitVariableExpr(Variable expr) throws RuntimeError {
         String variable = expr.token.getLexemme();
 
-        return this.environment.get(variable);
+        Object value = this.environment.get(variable);
+
+        if (value != null) {
+            return value;
+        } else {
+            throw error(expr.token, "Undeclared variable");
+        }
     }
 
     @Override

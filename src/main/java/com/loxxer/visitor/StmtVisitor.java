@@ -2,8 +2,10 @@ package com.loxxer.visitor;
 
 import com.loxxer.environment.Environment;
 import com.loxxer.error.ErrorHandler;
+import com.loxxer.parser.classes.statements.BlockStmt;
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
+import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
 
 public class StmtVisitor implements IStmtVisitor<Object> {
@@ -37,5 +39,14 @@ public class StmtVisitor implements IStmtVisitor<Object> {
         environment.set(statement.token.getLexemme(), value);
 
         return value;
+    }
+
+    @Override
+    public Object visitBlockStmt(BlockStmt statement) {
+        for (Stmt stmt : statement.statements) {
+            stmt.accept(this);
+        }
+
+        return null;
     }
 }
