@@ -1,18 +1,22 @@
-package com.loxxer.parser.classes;
+package com.loxxer.visitor;
 
+import com.loxxer.environment.Environment;
 import com.loxxer.error.ErrorHandler;
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.parser.RuntimeError;
+import com.loxxer.parser.classes.expr.Assign;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
+import com.loxxer.parser.classes.expr.Variable;
 
 /*
  * Class that traverses the syntax tree and evaluates the expression
  */
 public class ExprVisitor implements IVisitor<Object> {
     private ErrorHandler errorHandler;
+    private Environment environment;
 
     // Check if operand is of the class Double or not
     private boolean checkNumberOperand(LexicalToken operator, Object operand) throws RuntimeError {
@@ -59,8 +63,9 @@ public class ExprVisitor implements IVisitor<Object> {
         return left.equals(right);
     }
 
-    public ExprVisitor(ErrorHandler errorHandler) {
+    public ExprVisitor(ErrorHandler errorHandler, Environment environment) {
         this.errorHandler = errorHandler;
+        this.environment = environment;
     }
 
     @Override
@@ -138,5 +143,27 @@ public class ExprVisitor implements IVisitor<Object> {
     @Override
     public Object visitLiteralExpr(Literal expr) throws RuntimeError {
         return expr.value;
+    }
+
+    @Override
+    public Object visitVariableExpr(Variable expr) throws RuntimeError {
+        String variable = expr.token.getLexemme();
+
+        Object value = this.environment.get(variable);
+
+        if (value != null) {
+            return value;
+        } else {
+            throw error(expr.token, "Undeclared variable");
+        }
+    }
+
+    @Override
+    public Object visitAssignExpr(Assign expr) {
+
+        Object value = expr.value.accept(this);
+        this.environment.set(expr.token.getLexemme(), value);
+
+        return value;
     }
 }

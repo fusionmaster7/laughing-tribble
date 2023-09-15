@@ -1,5 +1,6 @@
 package com.loxxer.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.loxxer.error.ErrorHandler;
@@ -7,9 +8,17 @@ import com.loxxer.lexical.LexicalToken;
 import com.loxxer.lexical.LexicalTokenType;
 import com.loxxer.parser.classes.expr.Expr;
 import com.loxxer.parser.classes.expr.Grouping;
+import com.loxxer.parser.classes.expr.Assign;
 import com.loxxer.parser.classes.expr.Binary;
 import com.loxxer.parser.classes.expr.Literal;
 import com.loxxer.parser.classes.expr.Unary;
+import com.loxxer.parser.classes.expr.Variable;
+import com.loxxer.parser.classes.statements.BlockStmt;
+import com.loxxer.parser.classes.statements.ExprStmt;
+import com.loxxer.parser.classes.statements.PrintStmt;
+import com.loxxer.parser.classes.statements.Stmt;
+import com.loxxer.parser.classes.statements.VarStmt;
+import com.loxxer.visitor.ASTVisitor;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -110,6 +119,7 @@ public class Parser {
     }
 
     private Expr primary() {
+
         if (match(LexicalTokenType.FALSE)) {
             return new Literal(false);
         }
@@ -130,6 +140,10 @@ public class Parser {
             Expr expr = expr();
             consume(LexicalTokenType.RIGHT_PAREN, ") expected");
             return new Grouping(expr);
+        }
+
+        if (match(LexicalTokenType.IDENTIFIER)) {
+            return new Variable(previous());
         }
 
         throw error(peek(), "Expect Expression");
@@ -178,7 +192,7 @@ public class Parser {
 
     private Expr equality() {
         Expr expr = comparison();
-        while (match(LexicalTokenType.BANG_EQUAL, LexicalTokenType.EQUAL)) {
+        while (match(LexicalTokenType.BANG_EQUAL, LexicalTokenType.DOUBLE_EQUAL)) {
             LexicalToken op = previous();
             Expr right = comparison();
             expr = new Binary(expr, op, right);
@@ -186,15 +200,107 @@ public class Parser {
         return expr;
     }
 
+    private Expr assignment() {
+        Expr expr = equality();
+        if (match(LexicalTokenType.EQUAL)) {
+            LexicalToken equals = previous();
+            if (expr instanceof Variable) {
+                LexicalToken token = ((Variable) expr).token;
+                Expr value = assignment();
+                return new Assign(token, value);
+            } else {
+                error(peek(), "Invalid assignment after =");
+            }
+        }
+        return expr;
+    }
+
     private Expr expr() {
-        Expr finalExpr = equality();
+        Expr finalExpr = assignment();
         return finalExpr;
     }
 
-    public Expr parse() throws ParsingError {
+    private ExprStmt exprStmt() {
+        Expr expr = expr();
+        if (!match(LexicalTokenType.SEMICOLON)) {
+            throw error(peek(), "Semicolon missing");
+        }
+
+        return new ExprStmt(expr);
+    }
+
+    private PrintStmt printStmt() {
+        Expr expr = expr();
+        if (!match(LexicalTokenType.SEMICOLON)) {
+            throw error(peek(), "Semicolon missing");
+        }
+
+        return new PrintStmt(expr);
+    }
+
+    private BlockStmt block() {
+        BlockStmt block = new BlockStmt();
+
+        while (!isAtEnd() && peek().getTokenType() != LexicalTokenType.RIGHT_BRACE) {
+            Stmt decl = declaration();
+            block.addDeclaration(decl);
+        }
+
+        advance();
+
+        return block;
+    }
+
+    private Stmt statement() {
+        if (match(LexicalTokenType.PRINT)) {
+            return printStmt();
+        } else if (match(LexicalTokenType.LEFT_BRACE)) {
+            return block();
+        } else {
+            return exprStmt();
+        }
+    }
+
+    private Stmt varDeclaration() {
+        if (match(LexicalTokenType.IDENTIFIER)) {
+            LexicalToken token = previous();
+            if (match(LexicalTokenType.EQUAL)) {
+                Expr expr = expr();
+
+                if (!match(LexicalTokenType.SEMICOLON)) {
+                    throw error(peek(), "Semicolon Missing");
+
+                }
+
+                return new VarStmt(token, expr);
+            } else if (match(LexicalTokenType.SEMICOLON)) {
+                return new VarStmt(token);
+            } else {
+                throw error(peek(), "Semicolon Missing");
+            }
+        } else {
+            throw error(peek(), "Identifier missing. Identifier name must be specified");
+        }
+
+    }
+
+    private Stmt declaration() {
+        if (match(LexicalTokenType.VAR)) {
+            return varDeclaration();
+        } else {
+            return statement();
+        }
+    }
+
+    public List<Stmt> parse() throws ParsingError {
         try {
-            Expr finalExpr = expr();
-            return finalExpr;
+            List<Stmt> declarations = new ArrayList<Stmt>();
+            while (!isAtEnd()) {
+                Stmt declaration = declaration();
+                declarations.add(declaration);
+            }
+
+            return declarations;
         } catch (ParsingError e) {
             throw e;
         }
