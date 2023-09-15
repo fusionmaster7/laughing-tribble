@@ -15,10 +15,10 @@ import com.loxxer.parser.classes.expr.Unary;
 import com.loxxer.parser.classes.expr.Variable;
 import com.loxxer.parser.classes.statements.BlockStmt;
 import com.loxxer.parser.classes.statements.ExprStmt;
+import com.loxxer.parser.classes.statements.IfStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
-import com.loxxer.visitor.ASTVisitor;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -251,11 +251,39 @@ public class Parser {
         return block;
     }
 
+    private IfStmt ifStmt() {
+        IfStmt stmt = new IfStmt();
+
+        if (match(LexicalTokenType.LEFT_PAREN)) {
+            Expr condition = expr();
+
+            if (!(match(LexicalTokenType.RIGHT_PAREN))) {
+                throw error(peek(), "Expected ) after condition");
+            }
+
+            Stmt statement = statement();
+
+            stmt.condition = condition;
+            stmt.statement = statement;
+
+            if (match(LexicalTokenType.ELSE)) {
+                stmt.elseStatement = statement();
+            }
+
+        } else {
+            throw error(peek(), "Expected ( after if keyword");
+        }
+
+        return stmt;
+    }
+
     private Stmt statement() {
         if (match(LexicalTokenType.PRINT)) {
             return printStmt();
         } else if (match(LexicalTokenType.LEFT_BRACE)) {
             return block();
+        } else if (match(LexicalTokenType.IF)) {
+            return ifStmt();
         } else {
             return exprStmt();
         }
