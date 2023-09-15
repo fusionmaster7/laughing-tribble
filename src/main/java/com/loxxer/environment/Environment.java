@@ -8,10 +8,18 @@ import java.util.Map.Entry;
  * To support enviroment and bindings in the lox interpreter
  */
 public class Environment {
+    private Environment parent;
     private HashMap<String, Object> env;
 
     public Environment() {
         this.env = new HashMap<String, Object>();
+        // For global environment, parent will be null
+        this.parent = null;
+    }
+
+    public Environment(Environment parent) {
+        this.env = new HashMap<String, Object>();
+        this.parent = parent;
     }
 
     public void set(String variable, Object value) {
@@ -21,6 +29,8 @@ public class Environment {
     public Object get(String variable) {
         if (this.env.containsKey(variable)) {
             return this.env.get(variable);
+        } else if (this.parent != null) {
+            return this.parent.get(variable);
         } else {
             return null;
         }

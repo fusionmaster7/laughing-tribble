@@ -17,6 +17,11 @@ public class StmtVisitor implements IStmtVisitor<Object> {
         this.errorHandler = errorHandler;
     }
 
+    // To change the environment in case of block scope
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
     @Override
     public Object visitExprStmt(ExprStmt statement) {
         ExprVisitor visitor = new ExprVisitor(errorHandler, environment);
@@ -43,10 +48,15 @@ public class StmtVisitor implements IStmtVisitor<Object> {
 
     @Override
     public Object visitBlockStmt(BlockStmt statement) {
+        Environment oldEnvironment = this.environment;
+        Environment newEnvironment = new Environment(oldEnvironment);
+        setEnvironment(newEnvironment);
+
         for (Stmt stmt : statement.statements) {
             stmt.accept(this);
         }
 
+        setEnvironment(oldEnvironment);
         return null;
     }
 }
