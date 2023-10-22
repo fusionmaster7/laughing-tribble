@@ -200,8 +200,28 @@ public class Parser {
         return expr;
     }
 
-    private Expr assignment() {
+    private Expr logicalAnd() {
         Expr expr = equality();
+        while (match(LexicalTokenType.AND)) {
+	    LexicalToken op = previous();
+	    Expr right = equality();
+	    expr = new Binary(expr,op,right);
+        }
+	return expr;
+    }
+
+    private Expr logicalOr() {
+	Expr expr = logicalAnd();
+	while(match(LexicalTokenType.OR)) {
+	    LexicalToken op = previous();
+	    Expr right = logicalAnd();
+	    expr = new Binary(expr,op,right);
+	}
+	return expr;
+    }
+
+    private Expr assignment() {
+        Expr expr = logicalOr();
         if (match(LexicalTokenType.EQUAL)) {
             LexicalToken equals = previous();
             if (expr instanceof Variable) {
@@ -211,7 +231,7 @@ public class Parser {
             } else {
                 error(peek(), "Invalid assignment after =");
             }
-        }
+        } 
         return expr;
     }
 

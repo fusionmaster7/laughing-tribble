@@ -111,6 +111,10 @@ public class ExprVisitor implements IVisitor<Object> {
                 return isEqual(left, right);
             case BANG_EQUAL:
                 return !isEqual(left, right);
+	    case OR:
+		return isTruthy(left) || isTruthy(right);
+	    case AND:
+		return isTruthy(left) && isTruthy(right);  
             default:
                 break;
         }
