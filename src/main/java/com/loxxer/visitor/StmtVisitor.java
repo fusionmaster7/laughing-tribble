@@ -8,6 +8,7 @@ import com.loxxer.parser.classes.statements.IfStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
+import com.loxxer.parser.classes.statements.WhileStmt;
 
 public class StmtVisitor implements IStmtVisitor<Object> {
     private ErrorHandler errorHandler;
@@ -52,7 +53,7 @@ public class StmtVisitor implements IStmtVisitor<Object> {
         ExprVisitor visitor = new ExprVisitor(errorHandler, environment);
         Object value = statement.expr.accept(visitor);
 
-        environment.set(statement.token.getLexemme(), value);
+        environment.define(statement.token, value);
 
         return value;
     }
@@ -87,5 +88,17 @@ public class StmtVisitor implements IStmtVisitor<Object> {
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitWhileStmt(WhileStmt whileStmt) {
+	ExprVisitor visitor = new ExprVisitor(errorHandler, environment);
+	StmtVisitor stmtVisitor = new StmtVisitor(environment, errorHandler);
+	while(isTruthy(whileStmt.condition.accept(visitor))) {
+	    // Evaluate the loop statement. If it returns a non-null value, return the 
+	    // value
+	    whileStmt.stmt.accept(stmtVisitor);	    
+	}
+	return null;
     }
 }

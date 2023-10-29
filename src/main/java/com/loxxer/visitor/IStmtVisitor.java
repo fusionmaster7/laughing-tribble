@@ -5,6 +5,7 @@ import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.IfStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.VarStmt;
+import com.loxxer.parser.classes.statements.WhileStmt;
 
 public interface IStmtVisitor<T> {
     public T visitExprStmt(ExprStmt statement);
@@ -16,4 +17,6 @@ public interface IStmtVisitor<T> {
     public T visitBlockStmt(BlockStmt statement);
 
     public T visitIfStmt(IfStmt statement);
+
+    public T visitWhileStmt(WhileStmt statement);
 }

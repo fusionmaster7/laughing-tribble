@@ -19,6 +19,7 @@ import com.loxxer.parser.classes.statements.IfStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
+import com.loxxer.parser.classes.statements.WhileStmt;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
@@ -297,6 +298,21 @@ public class Parser {
         return stmt;
     }
 
+    private WhileStmt whileStmt() {
+	WhileStmt whileStmt = new WhileStmt();
+	if (match(LexicalTokenType.LEFT_PAREN)) {
+	    Expr cond = expr();
+	    whileStmt.condition = cond;
+	    if(match(LexicalTokenType.RIGHT_PAREN)) {
+		Stmt stmt = statement();
+		whileStmt.stmt = stmt;
+	    } else {
+		error(peek(), "Missing ) after the condition");
+	    }
+	}
+	return whileStmt;
+    }
+
     private Stmt statement() {
         if (match(LexicalTokenType.PRINT)) {
             return printStmt();
@@ -304,7 +320,9 @@ public class Parser {
             return block();
         } else if (match(LexicalTokenType.IF)) {
             return ifStmt();
-        } else {
+        } else if (match(LexicalTokenType.WHILE)) {
+	    return whileStmt();	
+	} else {
             return exprStmt();
         }
     }

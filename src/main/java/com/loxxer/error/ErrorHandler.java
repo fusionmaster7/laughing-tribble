@@ -37,4 +37,5 @@ public class ErrorHandler {
         }
         this.errors.add(error);
     }
+
 }
