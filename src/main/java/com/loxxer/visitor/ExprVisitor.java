@@ -107,10 +107,14 @@ public class ExprVisitor implements IVisitor<Object> {
                 checkNumberOperands(expr.op, left, right);
                 return (double) left <= (double) right;
 
-            case EQUAL:
+            case DOUBLE_EQUAL:
                 return isEqual(left, right);
             case BANG_EQUAL:
                 return !isEqual(left, right);
+	    case OR:
+		return isTruthy(left) || isTruthy(right);
+	    case AND:
+		return isTruthy(left) && isTruthy(right);  
             default:
                 break;
         }

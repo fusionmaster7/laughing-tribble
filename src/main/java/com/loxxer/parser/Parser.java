@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.loxxer.error.ErrorHandler;
+
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.lexical.LexicalTokenType;
+
 import com.loxxer.parser.classes.expr.Expr;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Assign;
@@ -15,20 +17,26 @@ import com.loxxer.parser.classes.expr.Unary;
 import com.loxxer.parser.classes.expr.Variable;
 import com.loxxer.parser.classes.statements.BlockStmt;
 import com.loxxer.parser.classes.statements.ExprStmt;
+import com.loxxer.parser.classes.statements.IfStmt;
 import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
-import com.loxxer.visitor.ASTVisitor;
+import com.loxxer.parser.classes.statements.WhileStmt;
+import com.loxxer.parser.classes.statements.ForStmt;
+
+import com.loxxer.logger.Logger;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
     private List<LexicalToken> tokens;
     private int current = 0;
     private ErrorHandler errorHandler;
+    private Logger LOGGER;
 
     public Parser(List<LexicalToken> tokens, ErrorHandler errorHandler) {
         this.tokens = tokens;
         this.errorHandler = errorHandler;
+	this.LOGGER = new Logger(Parser.class);
     }
 
     private LexicalToken peek() {
@@ -146,6 +154,7 @@ public class Parser {
             return new Variable(previous());
         }
 
+
         throw error(peek(), "Expect Expression");
     }
 
@@ -200,8 +209,28 @@ public class Parser {
         return expr;
     }
 
-    private Expr assignment() {
+    private Expr logicalAnd() {
         Expr expr = equality();
+        while (match(LexicalTokenType.AND)) {
+	    LexicalToken op = previous();
+	    Expr right = equality();
+	    expr = new Binary(expr,op,right);
+        }
+	return expr;
+    }
+
+    private Expr logicalOr() {
+	Expr expr = logicalAnd();
+	while(match(LexicalTokenType.OR)) {
+	    LexicalToken op = previous();
+	    Expr right = logicalAnd();
+	    expr = new Binary(expr,op,right);
+	}
+	return expr;
+    }
+
+    private Expr assignment() {
+        Expr expr = logicalOr();
         if (match(LexicalTokenType.EQUAL)) {
             LexicalToken equals = previous();
             if (expr instanceof Variable) {
@@ -211,7 +240,7 @@ public class Parser {
             } else {
                 error(peek(), "Invalid assignment after =");
             }
-        }
+        } 
         return expr;
     }
 
@@ -251,12 +280,87 @@ public class Parser {
         return block;
     }
 
+    private IfStmt ifStmt() {
+        IfStmt stmt = new IfStmt();
+
+        if (match(LexicalTokenType.LEFT_PAREN)) {
+            Expr condition = expr();
+
+            if (!(match(LexicalTokenType.RIGHT_PAREN))) {
+                throw error(peek(), "Expected ) after condition");
+            }
+
+            Stmt statement = statement();
+
+            stmt.condition = condition;
+            stmt.statement = statement;
+
+            if (match(LexicalTokenType.ELSE)) {
+                stmt.elseStatement = statement();
+            }
+
+        } else {
+            throw error(peek(), "Expected ( after if keyword");
+        }
+
+        return stmt;
+    }
+
+    private WhileStmt whileStmt() {
+	WhileStmt whileStmt = new WhileStmt();
+	if (match(LexicalTokenType.LEFT_PAREN)) {
+	    Expr cond = expr();
+	    whileStmt.condition = cond;
+	    if(match(LexicalTokenType.RIGHT_PAREN)) {
+		Stmt body = statement();
+		whileStmt.body = body;
+	    } else {
+		error(peek(), "Missing ) after the condition");
+	    }
+	}
+	return whileStmt;
+    }
+
+    private ForStmt forStmt() {
+	ForStmt forStmt = new ForStmt();
+	if (match(LexicalTokenType.LEFT_PAREN)) {
+	    Stmt init = null;
+	    // Check for loop initialisation
+	    if (match(LexicalTokenType.VAR)) {
+		init = varDeclaration();
+	    } else if (match(LexicalTokenType.SEMICOLON)) {
+		init = null;
+	    } else {
+		init = exprStmt();
+	    }
+	    forStmt.init = init;
+	    
+	    // Update condition
+	    if (!match(LexicalTokenType.SEMICOLON)) {
+		forStmt.condition = expr();
+		match(LexicalTokenType.SEMICOLON);
+		forStmt.update = expr();
+	    }
+
+	    if(match(LexicalTokenType.RIGHT_PAREN)) {
+		forStmt.body = statement();
+	    }
+	}
+	return forStmt;
+    }
+
     private Stmt statement() {
         if (match(LexicalTokenType.PRINT)) {
             return printStmt();
         } else if (match(LexicalTokenType.LEFT_BRACE)) {
             return block();
-        } else {
+        } else if (match(LexicalTokenType.IF)) {
+            return ifStmt();
+        } else if (match(LexicalTokenType.WHILE)) {
+	    return whileStmt();	
+	} else if (match(LexicalTokenType.FOR)) {
+	    return forStmt();
+	} else {
             return exprStmt();
         }
     }

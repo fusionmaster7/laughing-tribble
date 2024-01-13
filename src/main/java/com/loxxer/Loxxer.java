@@ -20,6 +20,7 @@ import com.loxxer.parser.RuntimeError;
 import com.loxxer.parser.classes.expr.Expr;
 import com.loxxer.parser.classes.statements.ExprStmt;
 import com.loxxer.parser.classes.statements.Stmt;
+import com.loxxer.parser.classes.statements.ForStmt;
 import com.loxxer.visitor.StmtVisitor;
 
 /**

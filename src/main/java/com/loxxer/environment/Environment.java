@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import com.loxxer.error.ErrorHandler;
+
+import com.loxxer.parser.RuntimeError;
+
+import com.loxxer.lexical.LexicalToken;
 /**
  * To support enviroment and bindings in the lox interpreter
  */
@@ -22,8 +27,25 @@ public class Environment {
         this.parent = parent;
     }
 
-    public void set(String variable, Object value) {
-        this.env.put(variable, value);
+    public boolean set(String variable, Object value) {
+	if(this.env.containsKey(variable)) {
+	    this.env.put(variable, value);
+	    return true;
+	} else if (this.parent != null) {
+	    return this.parent.set(variable, value);
+	} else {
+	    return false;
+	}
+    }
+
+    public void define(LexicalToken token, Object value) {
+	String lexemme = token.getLexemme();
+	if(get(lexemme) == null) {
+	    this.env.put(lexemme, value);
+	} else {
+	    // TODO - Use proper error handling here. Create a static error reporting class
+	    System.out.println("Variable already declared");
+	}
     }
 
     public Object get(String variable) {
