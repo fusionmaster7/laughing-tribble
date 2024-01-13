@@ -6,11 +6,11 @@ import com.loxxer.visitor.IStmtVisitor;
 
 public class WhileStmt extends Stmt {
     public Expr condition;
-    public Stmt stmt;
+    public Stmt body;
 
     public WhileStmt() {
 	this.condition = null;
-	this.stmt = null;
+	this.body = null;
     }
 
     @Override

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.loxxer.error.ErrorHandler;
+
 import com.loxxer.lexical.LexicalToken;
 import com.loxxer.lexical.LexicalTokenType;
+
 import com.loxxer.parser.classes.expr.Expr;
 import com.loxxer.parser.classes.expr.Grouping;
 import com.loxxer.parser.classes.expr.Assign;
@@ -20,16 +22,21 @@ import com.loxxer.parser.classes.statements.PrintStmt;
 import com.loxxer.parser.classes.statements.Stmt;
 import com.loxxer.parser.classes.statements.VarStmt;
 import com.loxxer.parser.classes.statements.WhileStmt;
+import com.loxxer.parser.classes.statements.ForStmt;
+
+import com.loxxer.logger.Logger;
 
 // The parser implements the grammar as specified in the lox.grammar file
 public class Parser {
     private List<LexicalToken> tokens;
     private int current = 0;
     private ErrorHandler errorHandler;
+    private Logger LOGGER;
 
     public Parser(List<LexicalToken> tokens, ErrorHandler errorHandler) {
         this.tokens = tokens;
         this.errorHandler = errorHandler;
+	this.LOGGER = new Logger(Parser.class);
     }
 
     private LexicalToken peek() {
@@ -146,6 +153,7 @@ public class Parser {
         if (match(LexicalTokenType.IDENTIFIER)) {
             return new Variable(previous());
         }
+
 
         throw error(peek(), "Expect Expression");
     }
@@ -304,13 +312,41 @@ public class Parser {
 	    Expr cond = expr();
 	    whileStmt.condition = cond;
 	    if(match(LexicalTokenType.RIGHT_PAREN)) {
-		Stmt stmt = statement();
-		whileStmt.stmt = stmt;
+		Stmt body = statement();
+		whileStmt.body = body;
 	    } else {
 		error(peek(), "Missing ) after the condition");
 	    }
 	}
 	return whileStmt;
+    }
+
+    private ForStmt forStmt() {
+	ForStmt forStmt = new ForStmt();
+	if (match(LexicalTokenType.LEFT_PAREN)) {
+	    Stmt init = null;
+	    // Check for loop initialisation
+	    if (match(LexicalTokenType.VAR)) {
+		init = varDeclaration();
+	    } else if (match(LexicalTokenType.SEMICOLON)) {
+		init = null;
+	    } else {
+		init = exprStmt();
+	    }
+	    forStmt.init = init;
+	    
+	    // Update condition
+	    if (!match(LexicalTokenType.SEMICOLON)) {
+		forStmt.condition = expr();
+		match(LexicalTokenType.SEMICOLON);
+		forStmt.update = expr();
+	    }
+
+	    if(match(LexicalTokenType.RIGHT_PAREN)) {
+		forStmt.body = statement();
+	    }
+	}
+	return forStmt;
     }
 
     private Stmt statement() {
@@ -322,6 +358,8 @@ public class Parser {
             return ifStmt();
         } else if (match(LexicalTokenType.WHILE)) {
 	    return whileStmt();	
+	} else if (match(LexicalTokenType.FOR)) {
+	    return forStmt();
 	} else {
             return exprStmt();
         }
